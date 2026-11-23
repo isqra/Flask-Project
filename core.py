@@ -1,6 +1,6 @@
-from flask import Flask, request, abort, redirect, url_for, render_template
+from flask import Flask, request, abort, redirect, url_for, render_template #pip install flask
 from markupsafe import escape
-from database import Database
+from databases import Database
 
 app = Flask(__name__) 
 
@@ -22,7 +22,7 @@ def login_get():
     return render_template('login.html')
     
 
-@app.route('/login', methods=['GET', 'POST'])
+@app.route('/login', methods=['GET', 'POST']) #маркер для кнопки на роут
 def login():
     if request.method == 'POST':
         return login_post()
@@ -34,8 +34,8 @@ def login_post():
     user_password = request.form.get('log_pass')
     select = db.select_users(user_login, user_password)
     # valid_password = select['password']
-    error = "Неверный логин или пароль"
-    message = "Добро пожаловать!"
+    error = "неверные данные или пароль"
+    message = "добро пожаловать"
     if select :
         return message
     else:
@@ -53,10 +53,11 @@ def register_post():
     reg_email = request.form.get('reg_email', '').strip()
     reg_password = request.form.get('reg_pass')
 
+    # Не отправляем отсутствующие поля в MySQL: email в users имеет NOT NULL.
     if not reg_email or not reg_password:
         return render_template(
             'register.html',
-            error='Почта или пароль не получены из формы. Проверьте name="reg_email" и name="reg_pass"'
+            error='Почта или пароль не пришли из формы. Проверь name="reg_email" и name="reg_pass".'
         )
 
     user = db.get_user_by_email(reg_email)
@@ -64,7 +65,7 @@ def register_post():
     if user:
         return render_template(
             'register.html',
-            error='Почта уже используется.'
+            error='Пользователь с такой почтой уже зарегистрирован'
         )
 
     db.insert_users(reg_email, reg_password)
